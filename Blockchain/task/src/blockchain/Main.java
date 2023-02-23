@@ -1,16 +1,15 @@
 package blockchain;
 
-import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class Main {
+    private static final int BLOCKCHAIN_SIZE = 5;
     public static void main(String[] args) {
         int numberOfHashZeros = Main.getIntFromCLI(
                 "Enter how many zeros the hash must start with:");
-        System.out.printf("Create hashes starting with %d zeros\n", numberOfHashZeros);
         Block.setNumberofPrefixedHashZeros(numberOfHashZeros);
 
-        Main.createBlocks(5);
+        Main.createBlocks(BLOCKCHAIN_SIZE);
     }
 
     private static void createBlocks(int n) {

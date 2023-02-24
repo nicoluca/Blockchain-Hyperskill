@@ -1,5 +1,6 @@
 package blockchain;
 
+import blockchain.domain.Block;
 import blockchain.domain.Blockchain;
 import blockchain.domain.Miner;
 
@@ -12,7 +13,6 @@ import java.util.concurrent.Executors;
 public class Main {
     private static final int BLOCKCHAIN_SIZE = 5;
     private static final int NUMBER_OF_MINERS = 5;
-    private static ExecutorService threadPool;
     private static List<Miner> miners = new ArrayList<>();
 
     public static void main(String[] args) {
@@ -22,19 +22,27 @@ public class Main {
 
     private static void startMining(Blockchain blockchain) {
         while (blockchain.getChainSize() < BLOCKCHAIN_SIZE) {
-            threadPool = Executors.newFixedThreadPool(NUMBER_OF_MINERS);
-            for (int i = 0; i < NUMBER_OF_MINERS; i++)
-                miners.add(new Miner(i));
+            Main.addMinersToPool(NUMBER_OF_MINERS, blockchain);
+            Main.mineOneBlock(blockchain, miners);
+        }
+    }
 
-            // Shut down all miners once one of them finds a valid block
-            try {
-                Boolean result = threadPool.invokeAny(miners);
-                threadPool.shutdownNow();
-                miners.clear();
-            } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
-            }
+    private static void addMinersToPool(int numberOfMiners, Blockchain blockchain) {
+        for (int i = 0; i < numberOfMiners; i++)
+            miners.add(new Miner(blockchain, i));
+    }
 
+    private static void mineOneBlock (Blockchain blockchain, List<Miner> miners) {
+        ExecutorService threadPool = Executors.newFixedThreadPool(miners.size());
+
+        // Shut down all miners once one of them finds a valid block
+        try {
+            Block resultingBlock = threadPool.invokeAny(miners);
+            blockchain.addBlock(resultingBlock);
+            threadPool.shutdownNow();
+            miners.clear();
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
         }
     }
 

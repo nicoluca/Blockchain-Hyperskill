@@ -2,18 +2,17 @@ package blockchain.domain;
 
 import java.util.concurrent.Callable;
 
-public class Miner implements Callable<Boolean> {
-    private Blockchain blockchain = Blockchain.getInstance();
-    private int minerid;
+public class Miner implements Callable<Block> {
+    private final Blockchain blockchain;
+    private final int minerId;
 
-    public Miner(int minerid) {
-        this.minerid = minerid;
+    public Miner(Blockchain blockchain, int minerId) {
+        this.blockchain = blockchain;
+        this.minerId = minerId;
     }
 
     @Override
-    public Boolean call() throws Exception {
-        Block block = Block.createBlock(blockchain, minerid);
-        blockchain.addBlock(block);
-        return null;
+    public Block call() {
+        return Block.createBlock(blockchain, minerId);
     }
 }

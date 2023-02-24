@@ -4,10 +4,8 @@ import blockchain.utils.MineUtil;
 import blockchain.utils.StringUtil;
 
 import java.util.Date;
-import java.util.Random;
 
 public class Block {
-    private static int id = 1;
     private final int blockId;
     private final String hash;
     private final String previousHash;
@@ -16,7 +14,7 @@ public class Block {
     private final int blockCreationTime;
     private final long minerId;
 
-    private Block(String previousHash, int blockId, long minerId) {
+    private Block(String previousHash, int blockId, long minerId) throws InterruptedException {
         long startTime = System.currentTimeMillis();
         this.minerId = minerId;
         this.previousHash = previousHash;
@@ -27,15 +25,20 @@ public class Block {
         this.blockCreationTime = MineUtil.timeSinceInSeconds(startTime);
     }
 
-    public static Block createBlock(Blockchain blockchain , int minerId) {
-        return new Block(blockchain.getLastBlockHash(), blockchain.getLastBlockId() + 1, minerId);
+    public static Block mineBlock(Blockchain blockchain , int minerId) throws InterruptedException {
+        if (blockchain.getChainSize() == 0)
+            return new Block("0", 1, minerId);
+        else
+            return new Block(blockchain.getLastBlock().getHash(), blockchain.getLastBlockId() + 1, minerId);
     }
 
-    private String calculateValidHash() {
+    private String calculateValidHash() throws InterruptedException {
         String currentHash = this.calculateCurrentHash();
         while (!MineUtil.startsWithValidZeros(currentHash, Blockchain.numberOfHashZeros)) {
             this.magicNumber = MineUtil.getRandomMagicLong(); // Brute force randomly, not incrementally, as per requirement
             currentHash = this.calculateCurrentHash();
+
+            MineUtil.checkIfThreadIsInterrupted();
         }
         return currentHash;
     }
@@ -72,11 +75,11 @@ public class Block {
                 "Block was generating for " + this.blockCreationTime + " seconds";
     }
 
-    public int getBlockId() {
+    int getBlockId() {
         return this.blockId;
     }
 
-    public long getMinerId() {
+    long getMinerId() {
         return this.minerId;
     }
 }

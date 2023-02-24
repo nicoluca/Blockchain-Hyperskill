@@ -13,7 +13,7 @@ import java.util.concurrent.Executors;
 public class Main {
     private static final int BLOCKCHAIN_SIZE = 5;
     private static final int NUMBER_OF_MINERS = 5;
-    private static List<Miner> miners = new ArrayList<>();
+    private static final List<Miner> miners = new ArrayList<>();
 
     public static void main(String[] args) {
         Blockchain blockchain = Blockchain.getInstance();
@@ -24,6 +24,7 @@ public class Main {
         while (blockchain.getChainSize() < BLOCKCHAIN_SIZE) {
             Main.addMinersToPool(NUMBER_OF_MINERS, blockchain);
             Main.mineOneBlock(blockchain, miners);
+            System.out.println(blockchain.getLastBlock());
         }
     }
 

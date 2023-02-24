@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class Blockchain {
     private static Blockchain instance;
-    private Deque<Block> chain = new ConcurrentLinkedDeque<>();
+    private final Deque<Block> chain = new ConcurrentLinkedDeque<>();
     static int numberOfHashZeros = 0;
 
     public static Blockchain getInstance() {
@@ -21,7 +21,6 @@ public class Blockchain {
             System.err.println("Miner " + block.getMinerId() + " tried to add an invalid block to the chain.");
         else {
             this.chain.add(block);
-            System.out.println(block);
             setNumberOfHashZeros();
         }
     }
@@ -36,18 +35,11 @@ public class Blockchain {
                     MineUtil.startsWithValidZeros(block.getHash(), Blockchain.numberOfHashZeros));
     }
 
-    private Block getLastBlock() {
+    public Block getLastBlock() {
         if (this.getChainSize() == 0)
             throw new IllegalStateException("Blockchain is empty.");
         else
             return this.chain.getLast();
-    }
-
-    String getLastBlockHash() {
-        if (this.getChainSize() == 0)
-            return "0";
-        else
-            return this.getLastBlock().getHash();
     }
 
     int getLastBlockId() {

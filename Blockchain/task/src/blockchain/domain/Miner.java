@@ -13,6 +13,10 @@ public class Miner implements Callable<Block> {
 
     @Override
     public Block call() {
-        return Block.createBlock(blockchain, minerId);
+        try {
+            return Block.mineBlock(blockchain, minerId);
+        } catch (InterruptedException e) {
+            throw new RuntimeException("Miner " + this.minerId + " was interrupted.");
+        }
     }
 }

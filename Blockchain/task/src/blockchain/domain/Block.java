@@ -1,11 +1,12 @@
-package blockchain;
+package blockchain.domain;
+
+import blockchain.utils.MineUtil;
+import blockchain.utils.StringUtil;
 
 import java.util.Date;
 import java.util.Random;
 
 public class Block {
-
-    private static int numberofPrefixedHashZeros;
     private static int id = 1;
     private final int blockId;
     private final String hash;
@@ -13,42 +14,30 @@ public class Block {
     private final long timeStamp;
     private long magicNumber;
     private final int blockCreationTime;
+    private final long minerId;
 
-    public Block(String previousHash) {
+    private Block(String previousHash, int blockId, long minerId) {
         long startTime = System.currentTimeMillis();
-        this.blockId = id++;
+        this.minerId = minerId;
         this.previousHash = previousHash;
         this.timeStamp = new Date().getTime();
-        this.magicNumber = Block.getRandomMagicLong();
+        this.magicNumber = MineUtil.getRandomMagicLong();
         this.hash = calculateValidHash();
-        this.blockCreationTime = Block.timeSinceInSeconds(startTime);
+        this.blockId = blockId;
+        this.blockCreationTime = MineUtil.timeSinceInSeconds(startTime);
     }
 
-    public static void setNumberofPrefixedHashZeros(int mumberofPrefixedHashZeros) {
-        Block.numberofPrefixedHashZeros = mumberofPrefixedHashZeros;
-    }
-
-    private static int timeSinceInSeconds(long startTime) {
-        return Math.toIntExact((System.currentTimeMillis() - startTime) / 1000L);
-    }
-
-    private static long getRandomMagicLong() {
-        Random random = new Random();
-        return random.nextLong();
+    public static Block createBlock(Blockchain blockchain , int minerId) {
+        return new Block(blockchain.getLastBlockHash(), blockchain.getLastBlockId() + 1, minerId);
     }
 
     private String calculateValidHash() {
         String currentHash = this.calculateCurrentHash();
-        while (!startsWithValidZeros(currentHash)) {
-            this.magicNumber = Block.getRandomMagicLong(); // Brute force randomly as per requirement
+        while (!MineUtil.startsWithValidZeros(currentHash, Blockchain.numberOfHashZeros)) {
+            this.magicNumber = MineUtil.getRandomMagicLong(); // Brute force randomly, not incrementally, as per requirement
             currentHash = this.calculateCurrentHash();
         }
         return currentHash;
-    }
-
-    private boolean startsWithValidZeros(String currentHash) {
-        String regex = "^0{" + Block.numberofPrefixedHashZeros + "}.*";
-        return currentHash.matches(regex);
     }
 
     private String calculateCurrentHash() {
@@ -59,19 +48,35 @@ public class Block {
                         this.magicNumber);
     }
 
-    public String getHash() {
+    String getHash() {
         return this.hash;
+    }
+
+    String getPreviousHash() {
+        return previousHash;
+    }
+
+    int getBlockCreationTime() {
+        return blockCreationTime;
     }
 
     @Override
     public String toString() {
-        String sb = "Block:\n" +
+        return "Block:\n" +
+                "Created by miner # " + this.minerId + "\n" +
                 "Id: " + this.blockId + "\n" +
                 "Timestamp: " + timeStamp + "\n" +
                 "Magic number: " + this.magicNumber + "\n" +
                 "Hash of the previous block: \n" + previousHash + "\n" +
                 "Hash of the block: \n" + hash + "\n" +
-                "Block was generating for " + this.blockCreationTime + " seconds\n";
-        return sb;
+                "Block was generating for " + this.blockCreationTime + " seconds";
+    }
+
+    public int getBlockId() {
+        return this.blockId;
+    }
+
+    public long getMinerId() {
+        return this.minerId;
     }
 }

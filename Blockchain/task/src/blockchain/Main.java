@@ -1,31 +1,41 @@
 package blockchain;
 
-import java.util.Scanner;
+import blockchain.domain.Blockchain;
+import blockchain.domain.Miner;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Main {
     private static final int BLOCKCHAIN_SIZE = 5;
+    private static final int NUMBER_OF_MINERS = 5;
+    private static ExecutorService threadPool;
+    private static List<Miner> miners = new ArrayList<>();
+
     public static void main(String[] args) {
-        int numberOfHashZeros = Main.getIntFromCLI(
-                "Enter how many zeros the hash must start with:");
-        Block.setNumberofPrefixedHashZeros(numberOfHashZeros);
-
-        Main.createBlocks(BLOCKCHAIN_SIZE);
+        Blockchain blockchain = Blockchain.getInstance();
+        Main.startMining(blockchain);
     }
 
-    private static void createBlocks(int n) {
-        Block block = new Block("0");
-        System.out.println(block);
-        for (int i = 1; i < n; i++) {
-            System.out.println();
-            block = new Block(block.getHash());
-            System.out.println(block);
+    private static void startMining(Blockchain blockchain) {
+        while (blockchain.getChainSize() < BLOCKCHAIN_SIZE) {
+            threadPool = Executors.newFixedThreadPool(NUMBER_OF_MINERS);
+            for (int i = 0; i < NUMBER_OF_MINERS; i++)
+                miners.add(new Miner(i));
+
+            // Shut down all miners once one of them finds a valid block
+            try {
+                Boolean result = threadPool.invokeAny(miners);
+                threadPool.shutdownNow();
+                miners.clear();
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+            }
+
         }
     }
 
-    private static int getIntFromCLI(String prompt) {
-        System.out.println(prompt);
-        try (Scanner scanner = new Scanner(System.in)) {
-            return scanner.nextInt();
-        }
-    }
 }

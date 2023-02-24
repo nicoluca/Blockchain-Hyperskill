@@ -16,4 +16,10 @@ public class MineUtil {
         String regex = "^0{" + numberOfZeros+ "}.*";
         return hashToCheck.matches(regex);
     }
+
+    public static void checkIfThreadIsInterrupted() throws InterruptedException {
+        if (Thread.currentThread().isInterrupted())
+            throw new InterruptedException();
+    }
+
 }

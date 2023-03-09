@@ -1,5 +1,10 @@
 package blockchain.domain.messages;
 
+import blockchain.domain.security.VerifyMessage;
+
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
 import java.util.Deque;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -7,7 +12,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class MessageReceptionService {
     private static MessageReceptionService instance;
-    private final Deque<String> messages;
+    private final Deque<Message> messages;
     private final ReadWriteLock readWriteLock;
 
     private MessageReceptionService() {
@@ -15,22 +20,35 @@ public class MessageReceptionService {
         this.readWriteLock = new ReentrantReadWriteLock();
     }
 
-    public static MessageReceptionService getInstance() {
+    public synchronized static MessageReceptionService getInstance() {
         if (instance == null) {
             instance = new MessageReceptionService();
         }
         return instance;
     }
 
-    void addMessage(String message) {
+    void addMessage(Message message) {
         synchronized (readWriteLock.writeLock()) {
-            this.messages.add(message);
+            verifyAndAddMessage(message);
         }
     }
 
-    public synchronized String readMessages() {
+    private void verifyAndAddMessage(Message message) {
+        try {
+            if (!VerifyMessage.verifyMessage(message))
+                throw new InvalidKeyException("Message is not valid.");
+            if (!(message.getMessageId() > this.messages.size()))
+                System.err.println("Message ID is not valid for message: " + message);
+        } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
+            throw new RuntimeException(e);
+        }
+
+        this.messages.add(message);
+    }
+
+    public synchronized Deque<Message> getMessages() {
         synchronized (readWriteLock.readLock()) {
-            return String.join("\n", this.messages);
+            return this.messages;
         }
     }
 

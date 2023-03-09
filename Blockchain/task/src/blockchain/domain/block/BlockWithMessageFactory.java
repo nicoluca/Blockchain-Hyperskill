@@ -1,10 +1,11 @@
-package blockchain.domain;
+package blockchain.domain.block;
 
+import blockchain.domain.messages.Message;
 import blockchain.domain.messages.MessageReceptionService;
 import blockchain.utils.MineUtil;
 
-import java.util.Date;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class BlockWithMessageFactory implements BlockFactoryInterface {
     private static BlockWithMessageFactory instance;
@@ -37,7 +38,7 @@ public class BlockWithMessageFactory implements BlockFactoryInterface {
         long magicNumber = MineUtil.getRandomMagicLong();
         long timeStamp = new Date().getTime();
         String hash = Block.calculateHash(1, "0", timeStamp, magicNumber);
-        return new BlockWithMessage(new Block("0", 1, 0, magicNumber, hash, MineUtil.timeSinceInSeconds(startTime)), "");
+        return new BlockWithMessage(new Block("0", 1, 0, magicNumber, hash, MineUtil.timeSinceInSeconds(startTime)), new LinkedList<>());
     }
 
     private BlockWithMessage mineSubsequentBlock(Blockchain blockchain, int minerId) throws InterruptedException {
@@ -52,12 +53,13 @@ public class BlockWithMessageFactory implements BlockFactoryInterface {
         while (!Thread.currentThread().isInterrupted()) {
             long magicNumber = MineUtil.getRandomMagicLong();
             long timeStamp = new Date().getTime();
-            String message = MessageReceptionService.getInstance().readMessages();
-            String hash = BlockWithMessage.calculateHash(blockId, previousHash, timeStamp, magicNumber, message);
+            Deque<Message> messages = new ConcurrentLinkedDeque<>(MessageReceptionService.getInstance().getMessages());
+            //System.out.println("Trying to mine block " + blockId + " with " + messages.size() + " messages");
+            String hash = BlockWithMessage.calculateHash(blockId, previousHash, timeStamp, magicNumber, messages);
             if (MineUtil.startsWithValidZeros(hash, Blockchain.getDifficulty())) {
                 int blockCreationTime = MineUtil.timeSinceInSeconds(startTime);
                 MessageReceptionService.getInstance().clearMessages();
-                return new BlockWithMessage(new Block(previousHash, blockId, minerId, magicNumber, hash, blockCreationTime), message);
+                return new BlockWithMessage(new Block(previousHash, blockId, minerId, magicNumber, hash, blockCreationTime), messages);
             }
         }
         throw new InterruptedException("Miner " + minerId + " was interrupted.");

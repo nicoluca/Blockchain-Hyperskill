@@ -1,6 +1,8 @@
 package blockchain;
 
 import blockchain.domain.*;
+import blockchain.domain.block.BlockWithMessage;
+import blockchain.domain.block.Blockchain;
 import blockchain.domain.messages.Messenger;
 
 import java.util.ArrayList;
@@ -11,14 +13,14 @@ import java.util.concurrent.Executors;
 import java.util.stream.IntStream;
 
 public class Main {
-    private static final int BLOCKCHAIN_SIZE = 5;
-    private static final int NUMBER_OF_MINERS = 5;
-    private static final int NUMBER_OF_MESSENGERS = 2;
     private static final List<Miner> miners = new ArrayList<>();
 
     public static void main(String[] args) {
         Blockchain blockchain = Blockchain.getInstance();
         Main.startMiningAndMessaging(blockchain);
+
+        if (!blockchain.isValid())
+            throw new IllegalStateException("Blockchain is not valid.");
     }
 
     private static void startMiningAndMessaging(Blockchain blockchain) {
@@ -28,8 +30,8 @@ public class Main {
     }
 
     private static ExecutorService startMessaging() {
-        ExecutorService threadPool = Executors.newFixedThreadPool(NUMBER_OF_MESSENGERS);
-        IntStream.range(0, NUMBER_OF_MESSENGERS).
+        ExecutorService threadPool = Executors.newFixedThreadPool(Config.NUMBER_OF_MESSENGERS);
+        IntStream.range(0, Config.NUMBER_OF_MESSENGERS).
                 forEach(i -> threadPool.submit(new Messenger()));
         try {
             Thread.sleep(1000);
@@ -41,8 +43,8 @@ public class Main {
     }
 
     private static void startMining(Blockchain blockchain) {
-        while (blockchain.getChainSize() < BLOCKCHAIN_SIZE) {
-            Main.addMinersToPool(NUMBER_OF_MINERS, blockchain);
+        while (blockchain.getChainSize() < Config.BLOCKCHAIN_SIZE) {
+            Main.addMinersToPool(Config.NUMBER_OF_MINERS, blockchain);
             Main.mineOneBlock(blockchain, miners);
         }
     }
@@ -57,7 +59,7 @@ public class Main {
 
         // Shut down all miners once one of them finds a valid block
         try {
-            Block resultingBlock = threadPool.invokeAny(miners);
+            BlockWithMessage resultingBlock = (BlockWithMessage) threadPool.invokeAny(miners);
             blockchain.addAndPrintBlock(resultingBlock);
             threadPool.shutdownNow();
             miners.clear();

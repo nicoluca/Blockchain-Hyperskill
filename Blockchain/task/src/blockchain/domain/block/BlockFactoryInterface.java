@@ -1,4 +1,4 @@
-package blockchain.domain;
+package blockchain.domain.block;
 
 import java.util.Optional;
 

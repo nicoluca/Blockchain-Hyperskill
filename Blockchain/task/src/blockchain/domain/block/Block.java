@@ -1,6 +1,5 @@
-package blockchain.domain;
+package blockchain.domain.block;
 
-import blockchain.utils.MineUtil;
 import blockchain.utils.StringUtil;
 
 import java.util.Date;

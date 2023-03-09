@@ -1,4 +1,4 @@
-package blockchain.domain;
+package blockchain.domain.block;
 
 public interface BlockInterface {
     String getPreviousHash();

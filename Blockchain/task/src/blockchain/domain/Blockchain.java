@@ -1,14 +1,17 @@
 package blockchain.domain;
 
+import blockchain.domain.messages.MessageReceptionService;
 import blockchain.utils.MineUtil;
 
 import java.util.Deque;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.locks.ReadWriteLock;
 
 public class Blockchain {
     private static Blockchain instance;
     private final Deque<Block> chain = new ConcurrentLinkedDeque<>();
-    static int numberOfHashZeros = 0;
+    static int difficulty = 0;
+    private final ReadWriteLock lock = new java.util.concurrent.locks.ReentrantReadWriteLock();
 
     public static Blockchain getInstance() {
         if (Blockchain.instance == null)
@@ -16,13 +19,23 @@ public class Blockchain {
         return Blockchain.instance;
     }
 
-    public synchronized void addBlock(Block block) {
-        if (!isValidNextBlock(block))
-            System.err.println("Miner " + block.getMinerId() + " tried to add an invalid block to the chain.");
-        else {
-            this.chain.add(block);
-            setNumberOfHashZeros();
+    public static int getDifficulty() {
+        return Blockchain.difficulty;
+    }
+
+    public synchronized void addAndPrintBlock(Block block) {
+        synchronized (this.lock.writeLock()) {
+            addBlock(block);
+            System.out.println(block);
+            setDifficulty();
         }
+    }
+
+    private void addBlock(Block block) {
+        if (isValidNextBlock(block)) {
+            this.chain.add(block);
+        } else
+            throw new IllegalArgumentException("Block is not valid.");
     }
 
     private boolean isValidNextBlock(Block block) {
@@ -32,7 +45,7 @@ public class Blockchain {
             return block.getPreviousHash().equals("0");
         else
             return (this.getLastBlock().getHash().equals(block.getPreviousHash()) &&
-                    MineUtil.startsWithValidZeros(block.getHash(), Blockchain.numberOfHashZeros));
+                    MineUtil.startsWithValidZeros(block.getHash(), Blockchain.difficulty));
     }
 
     public Block getLastBlock() {
@@ -42,21 +55,14 @@ public class Blockchain {
             return this.chain.getLast();
     }
 
-    int getLastBlockId() {
-        if (this.getChainSize() == 0)
-            return 0;
-        else
-            return this.getLastBlock().getBlockId();
-    }
-
-    private void setNumberOfHashZeros() { // TODO Requirements unclear, guessing something reasonable...
+    private void setDifficulty() { // TODO Requirements unclear, guessing something reasonable...
         if (this.getLastBlock().getBlockCreationTime() < 10) {
-            Blockchain.numberOfHashZeros++;
-            System.out.println("N was increased to " + Blockchain.numberOfHashZeros);
+            Blockchain.difficulty++;
+            System.out.println("N was increased to " + Blockchain.difficulty);
         } else if (this.getLastBlock().getBlockCreationTime() < 60) {
             System.out.println("N stays the same");
         } else {
-            Blockchain.numberOfHashZeros--;
+            Blockchain.difficulty--;
             System.out.println("N was decreased by 1");
         }
         System.out.println();

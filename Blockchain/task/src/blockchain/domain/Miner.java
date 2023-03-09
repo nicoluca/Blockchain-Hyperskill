@@ -1,5 +1,6 @@
 package blockchain.domain;
 
+import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public class Miner implements Callable<Block> {
@@ -13,10 +14,11 @@ public class Miner implements Callable<Block> {
 
     @Override
     public Block call() {
-        try {
-            return Block.mineBlock(blockchain, minerId);
-        } catch (InterruptedException e) {
+        Optional<Block> nextBlock = BlockWithMessageFactory.getInstance().tryToMineBlock(blockchain, minerId);
+
+        if (nextBlock.isPresent())
+            return nextBlock.get();
+        else
             throw new RuntimeException("Miner " + this.minerId + " was interrupted.");
-        }
     }
 }

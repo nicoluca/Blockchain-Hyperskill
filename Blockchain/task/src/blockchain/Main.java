@@ -1,9 +1,10 @@
 package blockchain;
 
-import blockchain.domain.*;
+import blockchain.domain.block.BlockInterface;
 import blockchain.domain.block.BlockWithMessage;
 import blockchain.domain.block.Blockchain;
 import blockchain.domain.messages.Messenger;
+import blockchain.domain.miner.Miner;
 
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -60,7 +61,7 @@ public class Main {
 
         // Shut down all miners once one of them finds a valid block
         try {
-            BlockWithMessage resultingBlock = (BlockWithMessage) threadPool.invokeAny(miners);
+            BlockInterface resultingBlock = (BlockWithMessage) threadPool.invokeAny(miners);
             blockchain.addAndPrintBlock(resultingBlock);
             threadPool.shutdownNow();
             miners.clear();

@@ -4,10 +4,6 @@ import blockchain.Config;
 
 import java.security.*;
 
-/*
-Adapted from: https://mkyong.com/java/java-asymmetric-cryptography-example/
- */
-
 public class CryptographyUtil {
 
     public static KeyPair generateKeyPair() {

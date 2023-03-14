@@ -27,19 +27,19 @@ public class MessageReceptionService {
 
     void addMessage(Message message) {
         synchronized (readWriteLock.writeLock()) {
-            verifyAndAddMessage(message);
+            try {
+                verifyAndAddMessage(message);
+            } catch (InvalidKeyException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
-    private void verifyAndAddMessage(Message message) {
-        try {
-            if (!message.verify())
-                throw new InvalidKeyException("Message is not valid.");
-            if (!(message.getMessageId() > this.messages.size()))
-                System.err.println("Message ID is not valid for message: " + message);
-        } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
-            throw new RuntimeException(e);
-        }
+    private void verifyAndAddMessage(Message message) throws InvalidKeyException {
+        if (!message.isValid())
+            throw new InvalidKeyException("Message is not valid.");
+        if (!(message.getMessageId() > this.messages.size()))
+            System.err.println("Message ID is not valid for message: " + message);
 
         this.messages.add(message);
     }

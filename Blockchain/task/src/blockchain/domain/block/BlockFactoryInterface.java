@@ -1,7 +1,9 @@
 package blockchain.domain.block;
 
+import blockchain.domain.miner.MinerInterface;
+
 import java.util.Optional;
 
 public interface BlockFactoryInterface {
-    Optional<Block> tryToMineBlock(Blockchain blockchain, int minerId);
+    Optional<BlockInterface> tryToMineBlock(Blockchain blockchain, MinerInterface miner);
 }

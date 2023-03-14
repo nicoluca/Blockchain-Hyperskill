@@ -11,7 +11,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 Adapted from: https://mkyong.com/java/java-digital-signatures-example/
  */
 
-public class Message  implements Verifiable {
+public class Message implements Verifiable {
     private final String messageText;
     private final long messageId;
     private final byte[] signature;
@@ -53,12 +53,17 @@ public class Message  implements Verifiable {
     }
 
     @Override
-    public boolean verify() throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
-        Signature sig = Signature.getInstance(Config.SIGNATURE_ALGORITHM);
-        sig.initVerify(this.publicKey);
-        byte[] messageBytes = (this.messageText + this.messageId).getBytes();
-        sig.update(messageBytes);
-        return sig.verify(this.signature);
+    public boolean isValid() {
+        try {
+            Signature sig = Signature.getInstance(Config.SIGNATURE_ALGORITHM);
+            sig.initVerify(this.publicKey);
+            byte[] messageBytes = (this.messageText + this.messageId).getBytes();
+            sig.update(messageBytes);
+            return sig.verify(this.signature);
+        } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     public PublicKey getPublicKey() {

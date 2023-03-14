@@ -1,7 +1,6 @@
 package blockchain.domain.block;
 
 import blockchain.Config;
-import blockchain.domain.messages.Message;
 import blockchain.utils.MineUtil;
 
 import java.util.Deque;
@@ -10,7 +9,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 
 public class Blockchain {
     private static Blockchain instance;
-    private final Deque<BlockWithMessage> chain = new ConcurrentLinkedDeque<>();
+    private final Deque<BlockInterface> chain = new ConcurrentLinkedDeque<>();
     static int difficulty = Config.INITIAL_DIFFICULTY;
     private final ReadWriteLock lock = new java.util.concurrent.locks.ReentrantReadWriteLock();
     private static long messageId = 1;
@@ -25,7 +24,7 @@ public class Blockchain {
         return Blockchain.difficulty;
     }
 
-    public synchronized void addAndPrintBlock(BlockWithMessage block) {
+    public synchronized void addAndPrintBlock(BlockInterface block) {
         synchronized (this.lock.writeLock()) {
             addBlock(block);
             System.out.println(block);
@@ -33,14 +32,14 @@ public class Blockchain {
         }
     }
 
-    private void addBlock(BlockWithMessage block) {
+    private void addBlock(BlockInterface block) {
         if (isValidNextBlock(block)) {
             this.chain.add(block);
         } else
             throw new IllegalArgumentException("Block is not valid.");
     }
 
-    private boolean isValidNextBlock(BlockWithMessage block) {
+    private boolean isValidNextBlock(BlockInterface block) {
         if (block == null)
             return false;
         else if (this.getChainSize() == 0)
@@ -50,7 +49,7 @@ public class Blockchain {
                     MineUtil.startsWithValidZeros(block.getHash(), Blockchain.difficulty));
     }
 
-    public BlockWithMessage getLastBlock() {
+    public BlockInterface getLastBlock() {
         if (this.getChainSize() == 0)
             throw new IllegalStateException("Blockchain is empty.");
         else
@@ -77,7 +76,7 @@ public class Blockchain {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        for (BlockWithMessage block : this.chain)
+        for (BlockInterface block : this.chain)
             sb.append(block.toString()).append("\n");
         return sb.toString();
     }
@@ -93,31 +92,42 @@ public class Blockchain {
             if (this.getChainSize() == 0)
                 return true;
             else {
-               return checkBlocks();
+               return validateBlockchain();
             }
         }
     }
 
-    private boolean checkBlocks() {
-        BlockWithMessage previousBlock = this.chain.getFirst();
+    private boolean validateBlockchain() {
+        BlockInterface previousBlock = this.chain.getFirst();
         long currentMessageId = 0;
-        for (BlockWithMessage block : this.chain) {
-            if (!block.getPreviousHash().equals(previousBlock.getHash()) && block.getPreviousHash() != "0") {
-                System.err.println("Previous hash does not match for block with id " + block.getBlockId());
-                return false;
-            }
+        for (BlockInterface block : this.chain) {
+            if (block.equals(previousBlock))
+                continue;
 
-            for (Message message : block.getMessages()) {
-                if (message.getMessageId() < currentMessageId) {
-                    System.err.println("Message id is not in valid order: " + message);
-                    return false;
-                }
-                else
-                    currentMessageId = message.getMessageId();
-            }
+            if (!isBlockOrderValid(previousBlock, block))
+                return false;
+
+            if (!block.isValid())
+                return false;
 
             previousBlock = block;
         }
         return true;
+    }
+
+    private boolean isBlockOrderValid(BlockInterface first, BlockInterface second) {
+        if (first.getBlockId() >= second.getBlockId()) {
+            System.err.println("Block with id " + first.getBlockId() + " is not valid.");
+            return false;
+        }
+        if (!first.getPreviousHash().equals(second.getPreviousHash())) {
+            System.err.println("Previous hash does not match for block with id " + first.getBlockId());
+            return false;
+        }
+        return true;
+    }
+
+    public Iterable<BlockInterface> getBlocks() {
+        return this.chain;
     }
 }

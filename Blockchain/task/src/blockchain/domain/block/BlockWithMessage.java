@@ -3,6 +3,7 @@ package blockchain.domain.block;
 import blockchain.domain.messages.Message;
 import blockchain.utils.StringUtil;
 
+import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
@@ -37,7 +38,7 @@ public class BlockWithMessage extends Block implements BlockInterface {
     }
 
     public Deque<Message> getMessages() {
-        return messages;
+        return new ArrayDeque<>(this.messages);
     }
 
     public static String calculateHash(int blockId, String previousHash, long timeStamp, long magicNumber, Deque<Message> messages) {
@@ -51,4 +52,29 @@ public class BlockWithMessage extends Block implements BlockInterface {
                                 .reduce("", (a, b) -> a + b)
         );
     }
+
+    @Override
+    public boolean isValid() {
+        if (!super.isValid())
+            return false;
+        
+        if (!areMessagesvalid())
+            return false;
+        
+        return true;
+    }
+
+    private boolean areMessagesvalid() {
+        Deque<Message> messages = new ArrayDeque<>(this.messages);
+        for (int i = 0; i < messages.size(); i++) {
+            Message message = messages.poll();
+            if (!message.isValid())
+                return false;
+            if (i == 0)
+                continue;
+            
+        }
+        return true;
+    }
+
 }

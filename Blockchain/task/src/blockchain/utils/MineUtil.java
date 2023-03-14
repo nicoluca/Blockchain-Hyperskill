@@ -16,6 +16,4 @@ public class MineUtil {
         String regex = "^0{" + numberOfZeros+ "}.*";
         return hashToCheck.matches(regex);
     }
-
-
 }

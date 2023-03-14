@@ -31,8 +31,13 @@ public class Block implements BlockInterface {
         return previousHash;
     }
 
-    int getBlockCreationTime() {
+    public int getBlockCreationTime() {
         return blockCreationTime;
+    }
+
+    @Override
+    public boolean isValid() {
+        return false;
     }
 
     @Override

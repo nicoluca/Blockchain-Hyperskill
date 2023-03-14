@@ -1,5 +1,6 @@
 package blockchain.domain.block;
 
+import blockchain.domain.miner.MinerInterface;
 import blockchain.domain.messages.Message;
 import blockchain.domain.messages.MessageReceptionService;
 import blockchain.utils.MineUtil;
@@ -17,9 +18,9 @@ public class BlockWithMessageFactory implements BlockFactoryInterface {
     }
 
     @Override
-    public Optional<Block> tryToMineBlock(Blockchain blockchain, int minerId) {
+    public Optional<BlockInterface> tryToMineBlock(Blockchain blockchain, MinerInterface miner) {
         try {
-            return Optional.of(mineBlock(blockchain, minerId));
+            return Optional.of(mineBlock(blockchain, miner.getMinerId()));
         } catch (InterruptedException e) {
             return Optional.empty();
         }
@@ -43,7 +44,7 @@ public class BlockWithMessageFactory implements BlockFactoryInterface {
 
     private BlockWithMessage mineSubsequentBlock(Blockchain blockchain, int minerId) throws InterruptedException {
         long startTime = new Date().getTime();
-        Block previousBlock = blockchain.getLastBlock();
+        BlockInterface previousBlock = blockchain.getLastBlock();
         int blockId = previousBlock.getBlockId() + 1;
         String previousHash = previousBlock.getHash();
         return startMining(blockId, previousHash, minerId, startTime);

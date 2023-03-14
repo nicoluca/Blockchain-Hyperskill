@@ -1,8 +1,8 @@
 package blockchain.domain.block;
 
+import blockchain.domain.miner.Miner;
+import blockchain.domain.miner.MinerInterface;
 import blockchain.utils.StringUtil;
-
-import java.util.Date;
 
 public class Block implements BlockInterface {
     private final int blockId;
@@ -11,12 +11,12 @@ public class Block implements BlockInterface {
     private final long timeStamp;
     private long magicNumber;
     private final int blockCreationTime;
-    private final long minerId;
+    private final MinerInterface miner;
 
-    Block(String previousHash, int blockId, long minerId, long magicNumber, String hash, int blockCreationTime) {
-        this.minerId = minerId;
+    Block(String previousHash, int blockId, MinerInterface miner, long timeStamp, long magicNumber, String hash, int blockCreationTime) {
+        this.miner = miner;
         this.previousHash = previousHash;
-        this.timeStamp = new Date().getTime();
+        this.timeStamp = timeStamp;
         this.magicNumber = magicNumber;
         this.hash = hash;
         this.blockId = blockId;
@@ -37,13 +37,13 @@ public class Block implements BlockInterface {
 
     @Override
     public boolean isValid() {
-        return false;
+        return this.hash.equals(calculateHash(this.blockId, this.previousHash, this.timeStamp, this.magicNumber));
     }
 
     @Override
     public String toString() {
         return "Block:\n" +
-                "Created by miner # " + this.minerId + "\n" +
+                "Created by miner # " + this.miner.getId() + "\n" +
                 "Id: " + this.blockId + "\n" +
                 "Timestamp: " + timeStamp + "\n" +
                 "Magic number: " + this.magicNumber + "\n" +
@@ -56,8 +56,9 @@ public class Block implements BlockInterface {
         return this.blockId;
     }
 
-    public long getMinerId() {
-        return this.minerId;
+    @Override
+    public MinerInterface getMiner() {
+        return this.miner;
     }
 
     public long getTimeStamp() {

@@ -1,9 +1,11 @@
 package blockchain.domain.block;
 
 import blockchain.Config;
+import blockchain.domain.CryptoOwner;
 import blockchain.utils.MineUtil;
 
 import java.util.Deque;
+import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.locks.ReadWriteLock;
 
@@ -57,10 +59,16 @@ public class Blockchain {
     }
 
     private void setDifficulty() { // TODO Requirements unclear, guessing something reasonable...
-        if (this.getLastBlock().getBlockCreationTime() < 10) {
+        if (Blockchain.difficulty >= Config.MAXIMUM_DIFFICULTY) {
+            Blockchain.difficulty--;
+            System.out.println("N was decreased by 1\n");
+            return;
+        }
+
+        if (this.getLastBlock().getBlockCreationTime() < Config.BLOCK_CREATION_TIME_THRESHOLD_INCREASE) {
             Blockchain.difficulty++;
             System.out.println("N was increased to " + Blockchain.difficulty);
-        } else if (this.getLastBlock().getBlockCreationTime() < 60) {
+        } else if (this.getLastBlock().getBlockCreationTime() < Config.BLOCK_CREATION_TIME_THRESHOLD_DECREASE) {
             System.out.println("N stays the same");
         } else {
             Blockchain.difficulty--;
@@ -81,12 +89,6 @@ public class Blockchain {
         return sb.toString();
     }
 
-    public long getNextMessageId() {
-        synchronized (this.lock.writeLock()) {
-            return messageId++;
-        }
-    }
-
     public boolean isValid() {
         synchronized (this.lock.readLock()) {
             if (this.getChainSize() == 0)
@@ -98,17 +100,20 @@ public class Blockchain {
     }
 
     private boolean validateBlockchain() {
-        BlockInterface previousBlock = this.chain.getFirst();
-        long currentMessageId = 0;
-        for (BlockInterface block : this.chain) {
+        List<BlockInterface> blocks = List.copyOf(this.chain);
+        BlockInterface previousBlock = blocks.get(0);
+
+        for (BlockInterface block : blocks) {
             if (block.equals(previousBlock))
-                continue;
+               continue;
 
             if (!isBlockOrderValid(previousBlock, block))
                 return false;
 
-            if (!block.isValid())
+            if (!block.isValid()) {
+                System.err.println("Block with id " + block.getBlockId() + " is not valid.");
                 return false;
+            }
 
             previousBlock = block;
         }
@@ -120,8 +125,9 @@ public class Blockchain {
             System.err.println("Block with id " + first.getBlockId() + " is not valid.");
             return false;
         }
-        if (!first.getPreviousHash().equals(second.getPreviousHash())) {
-            System.err.println("Previous hash does not match for block with id " + first.getBlockId());
+
+        if (!second.getPreviousHash().equals(first.getHash())) {
+            System.err.println("Previous hash does not match for block with id " + second.getBlockId());
             return false;
         }
         return true;

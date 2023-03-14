@@ -24,23 +24,18 @@ public class StringUtil {
         }
     }
 
-    public static List<String> getMockMessages() {
+    public static List<String> getNames() {
         return Arrays.asList(
-                "Tom: Hey, I'm first!",
-                "Sarah: It's not fair!",
-                "Sarah: You always will be first because it is your blockchain!",
-                "Sarah: Anyway, thank you for this amazing chat.",
-                "Tom: You're welcome :)",
-                "Nick: Hey Tom, nice chat",
-                "Tom: Hey Nick, nice to see you here",
-                "Sarah: Hey Nick, nice to see you here",
-                "Nick: Hey Sarah, nice to see you here",
-                "Sarah: Hey Tom, nice to see you here",
-                "Tom: Hey Sarah, nice to see you here",
-                "Sarah: Hey Nick, nice to see you here",
-                "Nick: Hey Sarah, nice to see you here",
-                "Sarah: Hey Tom, nice to see you here",
-                "Tom: Hey Sarah, nice to see you here"
+                "Tom",
+                "Jerry",
+                "Donald",
+                "Mickey",
+                "Minnie",
+                "Goofy",
+                "Pluto",
+                "Daisy",
+                "Bugs",
+                "Daffy"
         );
     }
 }

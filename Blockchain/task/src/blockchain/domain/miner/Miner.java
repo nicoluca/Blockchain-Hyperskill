@@ -1,43 +1,38 @@
 package blockchain.domain.miner;
 
+import blockchain.Config;
+import blockchain.domain.CryptoOwner;
 import blockchain.domain.block.*;
-import blockchain.domain.messages.CryptoWallet;
-import blockchain.utils.CryptographyUtil;
-
-import java.security.KeyPair;
-import java.security.PrivateKey;
-import java.security.PublicKey;
 import java.util.Optional;
 
 public class Miner implements MinerInterface {
     private final Blockchain blockchain;
     private final int minerId;
-    private final CryptoWallet cryptoWallet;
-    private final PublicKey publicKey;
-    private final PrivateKey privateKey;
+    private final CryptoOwner owner;
 
-    public Miner(Blockchain blockchain, int minerId) {
+    public Miner(Blockchain blockchain, int minerId, CryptoOwner owner) {
         this.blockchain = blockchain;
         this.minerId = minerId;
-        this.cryptoWallet = new CryptoWallet();
-
-        KeyPair keyPair = CryptographyUtil.generateKeyPair();
-        this.privateKey = keyPair.getPrivate();
-        this.publicKey = keyPair.getPublic();
+        this.owner = owner;
     }
 
     @Override
     public BlockInterface call() {
-        Optional<BlockInterface> nextBlock = BlockWithMessageFactory.getInstance().tryToMineBlock(blockchain, this);
+        Optional<BlockInterface> nextBlock = Config.BLOCK_FACTORY.tryToMineBlock(blockchain, this);
 
-        if (nextBlock.isPresent() && nextBlock.get() instanceof BlockWithMessage)
+        if (nextBlock.isPresent())
             return nextBlock.get();
         else
             throw new RuntimeException("Miner " + this.minerId + " was interrupted.");
     }
 
     @Override
-    public int getMinerId() {
+    public int getId() {
         return this.minerId;
+    }
+
+    @Override
+    public CryptoOwner getOwner() {
+        return this.owner;
     }
 }

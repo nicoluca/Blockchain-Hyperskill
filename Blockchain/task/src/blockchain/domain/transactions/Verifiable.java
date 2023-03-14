@@ -1,4 +1,4 @@
-package blockchain.domain.messages;
+package blockchain.domain.transactions;
 
 public interface Verifiable {
     boolean isValid();

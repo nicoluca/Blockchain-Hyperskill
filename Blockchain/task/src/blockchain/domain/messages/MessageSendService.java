@@ -11,7 +11,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class MessageSendService {
     private static MessageSendService instance;
-    private static ReadWriteLock radWriteLock;
+    private static ReadWriteLock readWriteLock;
 
     public synchronized static MessageSendService getInstance() {
         if (instance == null)
@@ -20,11 +20,11 @@ public class MessageSendService {
     }
 
     private MessageSendService() {
-        this.radWriteLock = new ReentrantReadWriteLock();
+        this.readWriteLock = new ReentrantReadWriteLock();
     }
 
     void sendMessageToReceptionService(String messageText, Messenger messenger, PrivateKey privateKey) {
-        synchronized (radWriteLock.writeLock()) {
+        synchronized (readWriteLock.writeLock()) {
             try {
                 long messageId = Blockchain.getInstance().getNextMessageId();
                 Message message = new Message(messageText, messageId, privateKey, messenger.getPublicKey());

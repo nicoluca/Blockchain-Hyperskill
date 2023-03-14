@@ -1,7 +1,7 @@
 package blockchain.domain.messages;
 
 import blockchain.Config;
-import blockchain.domain.security.GenerateKeys;
+import blockchain.utils.CryptographyUtil;
 import blockchain.utils.StringUtil;
 
 import java.security.*;
@@ -9,22 +9,13 @@ import java.util.List;
 import java.util.Random;
 
 public class Messenger implements Runnable {
-    private PrivateKey privateKey;
-    private PublicKey publicKey;
+    private final PrivateKey privateKey;
+    private final PublicKey publicKey;
 
     public Messenger() {
-        try {
-            setUpMessenger();
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private void setUpMessenger() throws NoSuchAlgorithmException {
-        GenerateKeys generateKeys = new GenerateKeys(Config.KEY_LENGTH);
-        generateKeys.createKeys();
-        this.privateKey = generateKeys.getPrivateKey();
-        this.publicKey = generateKeys.getPublicKey();
+        KeyPair keyPair = CryptographyUtil.generateKeyPair();
+        this.privateKey = keyPair.getPrivate();
+        this.publicKey = keyPair.getPublic();
     }
 
     @Override

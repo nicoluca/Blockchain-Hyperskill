@@ -9,6 +9,5 @@ public class Config {
     public static final int KEY_LENGTH = 1024;
     public static final String SIGNATURE_ALGORITHM = "SHA1withRSA";
     public static final String KEY_FACTORY_ALGORITHM = "RSA";
-
-
+    public static final long INITIAL_WALLET_BALANCE = 100;
 }

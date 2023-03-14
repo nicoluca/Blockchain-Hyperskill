@@ -1,7 +1,5 @@
 package blockchain.domain.messages;
 
-import blockchain.domain.security.VerifyMessage;
-
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
@@ -35,7 +33,7 @@ public class MessageReceptionService {
 
     private void verifyAndAddMessage(Message message) {
         try {
-            if (!VerifyMessage.verifyMessage(message))
+            if (!message.verify())
                 throw new InvalidKeyException("Message is not valid.");
             if (!(message.getMessageId() > this.messages.size()))
                 System.err.println("Message ID is not valid for message: " + message);

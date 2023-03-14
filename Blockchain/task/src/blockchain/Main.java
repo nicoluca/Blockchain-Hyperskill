@@ -5,6 +5,7 @@ import blockchain.domain.block.BlockWithMessage;
 import blockchain.domain.block.Blockchain;
 import blockchain.domain.messages.Messenger;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -15,7 +16,7 @@ import java.util.stream.IntStream;
 public class Main {
     private static final List<Miner> miners = new ArrayList<>();
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws NoSuchAlgorithmException {
         Blockchain blockchain = Blockchain.getInstance();
         Main.startMiningAndMessaging(blockchain);
 
@@ -23,7 +24,7 @@ public class Main {
             throw new IllegalStateException("Blockchain is not valid.");
     }
 
-    private static void startMiningAndMessaging(Blockchain blockchain) {
+    private static void startMiningAndMessaging(Blockchain blockchain) throws NoSuchAlgorithmException {
         ExecutorService messengerExecutor = Main.startMessaging();
         Main.startMining(blockchain);
         messengerExecutor.shutdownNow();
@@ -42,14 +43,14 @@ public class Main {
         return threadPool;
     }
 
-    private static void startMining(Blockchain blockchain) {
+    private static void startMining(Blockchain blockchain) throws NoSuchAlgorithmException {
         while (blockchain.getChainSize() < Config.BLOCKCHAIN_SIZE) {
             Main.addMinersToPool(Config.NUMBER_OF_MINERS, blockchain);
             Main.mineOneBlock(blockchain, miners);
         }
     }
 
-    private static void addMinersToPool(int numberOfMiners, Blockchain blockchain) {
+    private static void addMinersToPool(int numberOfMiners, Blockchain blockchain) throws NoSuchAlgorithmException {
         for (int i = 0; i < numberOfMiners; i++)
             miners.add(new Miner(blockchain, i));
     }

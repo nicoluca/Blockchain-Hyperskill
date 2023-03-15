@@ -32,12 +32,8 @@ public class BlockWithTransactions extends Block implements BlockInterface {
 
     @Override
     public boolean isValid() {
-        if (!this.hash.equals(calculateHash(this.getId(), this.getPreviousHash(), this.getTimeStamp(), this.getMagicNumber(), this.transactions))) {
-            System.err.println("Block hash is not valid");
-            System.err.println("Expected: " + calculateHash(this.getId(), this.getPreviousHash(), this.getTimeStamp(), this.getMagicNumber(), this.transactions));
-            System.err.println("Actual: " + this.getHash());
+        if (!this.hash.equals(calculateHash(this.getId(), this.getPreviousHash(), this.getTimeStamp(), this.getMagicNumber(), this.transactions)))
             return false;
-        }
 
         return transactions.stream()
                 .allMatch(Transaction::isValid);

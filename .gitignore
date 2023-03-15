@@ -1,8 +1,0 @@
-# Project exclude paths
-/.gradle/
-/Blockchain/task/build/
-/Blockchain/task/out/
-/Blockchain/task/out/production/classes/
-/Topics/LocalDate/Theory/build/
-/Topics/LocalDate/Theory/out/
-/Topics/LocalDate/Theory/out/production/classes/

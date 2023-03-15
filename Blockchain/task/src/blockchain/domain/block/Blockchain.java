@@ -1,10 +1,10 @@
 package blockchain.domain.block;
 
 import blockchain.Config;
-import blockchain.domain.CryptoOwner;
 import blockchain.utils.MineUtil;
 
 import java.util.Deque;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -14,19 +14,18 @@ public class Blockchain {
     private final Deque<BlockInterface> chain = new ConcurrentLinkedDeque<>();
     static int difficulty = Config.INITIAL_DIFFICULTY;
     private final ReadWriteLock lock = new java.util.concurrent.locks.ReentrantReadWriteLock();
-    private static long messageId = 1;
 
-    public static Blockchain getInstance() {
+    public synchronized static Blockchain getInstance() {
         if (Blockchain.instance == null)
             Blockchain.instance = new Blockchain();
         return Blockchain.instance;
     }
 
-    public static int getDifficulty() {
+    public static synchronized int getDifficulty() {
         return Blockchain.difficulty;
     }
 
-    public synchronized void addAndPrintBlock(BlockInterface block) {
+    public void addAndPrintBlock(BlockInterface block) {
         synchronized (this.lock.writeLock()) {
             addBlock(block);
             System.out.println(block);
@@ -93,9 +92,8 @@ public class Blockchain {
         synchronized (this.lock.readLock()) {
             if (this.getChainSize() == 0)
                 return true;
-            else {
+            else
                return validateBlockchain();
-            }
         }
     }
 
@@ -111,7 +109,7 @@ public class Blockchain {
                 return false;
 
             if (!block.isValid()) {
-                System.err.println("Block with id " + block.getBlockId() + " is not valid.");
+                System.err.println("Block with id " + block.getId() + " is not valid.");
                 return false;
             }
 
@@ -121,19 +119,20 @@ public class Blockchain {
     }
 
     private boolean isBlockOrderValid(BlockInterface first, BlockInterface second) {
-        if (first.getBlockId() >= second.getBlockId()) {
-            System.err.println("Block with id " + first.getBlockId() + " is not valid.");
+        if (first.getId() >= second.getId()) {
+            System.err.println("Block with id " + first.getId() + " is not valid.");
             return false;
         }
 
         if (!second.getPreviousHash().equals(first.getHash())) {
-            System.err.println("Previous hash does not match for block with id " + second.getBlockId());
+            System.err.println("Previous hash does not match for block with id " + second.getId());
             return false;
         }
+
         return true;
     }
 
     public Iterable<BlockInterface> getBlocks() {
-        return this.chain;
+        return new LinkedList<>(this.chain);
     }
 }

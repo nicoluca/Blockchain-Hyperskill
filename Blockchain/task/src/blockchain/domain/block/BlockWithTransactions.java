@@ -10,7 +10,7 @@ public class BlockWithTransactions extends Block implements BlockInterface {
     private final Deque<Transaction> transactions;
 
     public BlockWithTransactions(Block block, Deque<Transaction> transactions) {
-        super(block.getPreviousHash(), block.getBlockId(), block.getMiner(), block.getTimeStamp(), block.getMagicNumber(), block.getHash(), block.getBlockCreationTime());
+        super(block.getPreviousHash(), block.getId(), block.getMiner(), block.getTimeStamp(), block.getMagicNumber(), block.getHash(), block.getBlockCreationTime());
         this.transactions = transactions;
     }
 
@@ -32,9 +32,9 @@ public class BlockWithTransactions extends Block implements BlockInterface {
 
     @Override
     public boolean isValid() {
-        if (!this.hash.equals(calculateHash(this.getBlockId(), this.getPreviousHash(), this.getTimeStamp(), this.getMagicNumber(), this.transactions))) {
+        if (!this.hash.equals(calculateHash(this.getId(), this.getPreviousHash(), this.getTimeStamp(), this.getMagicNumber(), this.transactions))) {
             System.err.println("Block hash is not valid");
-            System.err.println("Expected: " + calculateHash(this.getBlockId(), this.getPreviousHash(), this.getTimeStamp(), this.getMagicNumber(), this.transactions));
+            System.err.println("Expected: " + calculateHash(this.getId(), this.getPreviousHash(), this.getTimeStamp(), this.getMagicNumber(), this.transactions));
             System.err.println("Actual: " + this.getHash());
             return false;
         }
@@ -48,7 +48,7 @@ public class BlockWithTransactions extends Block implements BlockInterface {
         return "Block:\n" +
                 "Created by: miner" + this.getMiner().getId() + "\n" +
                 "miner" + this.getMiner().getId() + " gets 100 VC\n" +
-                "Id: " + this.getBlockId() + "\n" +
+                "Id: " + this.getId() + "\n" +
                 "Timestamp: " + this.getTimeStamp() + "\n" +
                 "Magic number: " + this.getMagicNumber() + "\n" +
                 "Hash of the previous block: \n" + this.getPreviousHash() + "\n" +

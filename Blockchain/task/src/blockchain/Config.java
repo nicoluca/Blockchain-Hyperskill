@@ -3,8 +3,6 @@ package blockchain;
 import blockchain.domain.block.BlockFactoryInterface;
 import blockchain.domain.block.BlockWithTransactionFactory;
 
-import java.math.BigDecimal;
-
 public class Config {
     public static final int BLOCKCHAIN_SIZE = 15;
     public static final int NUMBER_OF_MINERS = 10;

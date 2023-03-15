@@ -39,7 +39,7 @@ public class BlockWithTransactionFactory implements BlockFactoryInterface {
     private BlockWithTransactions mineSubsequentBlock(Blockchain blockchain, MinerInterface miner) throws InterruptedException {
         long startTime = new Date().getTime();
         BlockInterface previousBlock = blockchain.getLastBlock();
-        int blockId = previousBlock.getBlockId() + 1;
+        int blockId = previousBlock.getId() + 1;
         String previousHash = previousBlock.getHash();
         return startMining(blockId, previousHash, miner, startTime);
     }

@@ -1,6 +1,5 @@
 package blockchain.domain.block;
 
-import blockchain.domain.miner.Miner;
 import blockchain.domain.miner.MinerInterface;
 import blockchain.utils.StringUtil;
 
@@ -52,7 +51,7 @@ public class Block implements BlockInterface {
                 "Block was generating for " + this.blockCreationTime + " seconds";
     }
 
-    public int getBlockId() {
+    public int getId() {
         return this.blockId;
     }
 

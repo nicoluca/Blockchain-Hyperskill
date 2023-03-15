@@ -4,8 +4,13 @@ import blockchain.Config;
 import blockchain.domain.CryptoOwner;
 import blockchain.domain.block.*;
 import java.util.Optional;
+import java.util.concurrent.Callable;
 
-public class Miner implements MinerInterface {
+/*
+Miner is a callable thread that tries to mine a block, using the block factory. Belongs to one owner.
+ */
+
+public class Miner implements MinerInterface, Callable<BlockInterface> {
     private final Blockchain blockchain;
     private final int minerId;
     private final CryptoOwner owner;

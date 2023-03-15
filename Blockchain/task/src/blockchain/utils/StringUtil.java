@@ -1,8 +1,8 @@
 package blockchain.utils;
 
+import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
-import java.util.Arrays;
-import java.util.List;
+import java.security.NoSuchAlgorithmException;
 
 public class StringUtil {
     /* Applies Sha256 to a string and returns a hash. */
@@ -18,24 +18,8 @@ public class StringUtil {
                 hexString.append(hex);
             }
             return hexString.toString();
-        }
-        catch(Exception e) {
+        } catch (UnsupportedEncodingException | NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    public static List<String> getNames() {
-        return Arrays.asList(
-                "Tom",
-                "Jerry",
-                "Donald",
-                "Mickey",
-                "Minnie",
-                "Goofy",
-                "Pluto",
-                "Daisy",
-                "Bugs",
-                "Daffy"
-        );
     }
 }

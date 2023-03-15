@@ -31,8 +31,4 @@ public class CryptoOwner {
     public Miner getMiner() {
         return this.miner;
     }
-
-    public void sendMoney(CryptoOwner receiver, BigDecimal amount) {
-        TransactionFactory.getInstance().generateTransaction(this, receiver, amount);
-    }
 }

@@ -1,5 +1,6 @@
 package blockchain.domain.block;
 
+import blockchain.Config;
 import blockchain.domain.transactions.Transaction;
 import blockchain.utils.StringUtil;
 
@@ -43,7 +44,7 @@ public class BlockWithTransactions extends Block implements BlockInterface {
     public String toString() {
         return "Block:\n" +
                 "Created by: miner" + this.getMiner().getId() + "\n" +
-                "miner" + this.getMiner().getId() + " gets 100 VC\n" +
+                "miner" + this.getMiner().getId() + " gets " + Config.MINING_REWARD + " VC\n" +
                 "Id: " + this.getId() + "\n" +
                 "Timestamp: " + this.getTimeStamp() + "\n" +
                 "Magic number: " + this.getMagicNumber() + "\n" +

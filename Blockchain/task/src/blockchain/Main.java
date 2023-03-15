@@ -6,7 +6,6 @@ import blockchain.domain.block.BlockWithTransactions;
 import blockchain.domain.block.Blockchain;
 import blockchain.utils.TransactionUtil;
 
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -16,16 +15,16 @@ import java.util.stream.Collectors;
 
 public class Main {
     private static final List<CryptoOwner> owners = new ArrayList<>();
+    private static final Blockchain blockchain = Blockchain.getInstance();
 
-    public static void main(String[] args) throws NoSuchAlgorithmException {
-        Blockchain blockchain = Blockchain.getInstance();
-        Main.startMiningAndMessaging(blockchain);
+    public static void main(String[] args) {
+        Main.startMiningAndTransactions(blockchain);
 
         if (!blockchain.isValid())
             throw new IllegalStateException("Blockchain is not valid.");
     }
 
-    private static void startMiningAndMessaging(Blockchain blockchain) throws NoSuchAlgorithmException {
+    private static void startMiningAndTransactions(Blockchain blockchain) {
         for (int i = 0; i < Config.NUMBER_OF_MINERS; i++)
             owners.add(new CryptoOwner("miner" + i, blockchain));
 
@@ -37,7 +36,6 @@ public class Main {
     private static Thread startTransacting() {
         Thread transactionsThread = new Thread(Main::generateTransactions);
         transactionsThread.start();
-
         return transactionsThread;
     }
 
@@ -52,7 +50,7 @@ public class Main {
         }
     }
 
-    private static void startMining(Blockchain blockchain) throws NoSuchAlgorithmException {
+    private static void startMining(Blockchain blockchain) {
         while (blockchain.getChainSize() < Config.BLOCKCHAIN_SIZE)
             Main.mineOneBlock(blockchain);
     }
@@ -62,7 +60,7 @@ public class Main {
 
         // Shut down all miners once one of them finds a valid block
         try {
-            BlockInterface resultingBlock = (BlockWithTransactions) threadPool
+            BlockInterface resultingBlock = threadPool
                     .invokeAny(
                             owners.stream()
                             .map(CryptoOwner::getMiner)
@@ -71,8 +69,7 @@ public class Main {
             blockchain.addAndPrintBlock(resultingBlock);
             threadPool.shutdownNow();
         } catch (ExecutionException | InterruptedException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
-
 }

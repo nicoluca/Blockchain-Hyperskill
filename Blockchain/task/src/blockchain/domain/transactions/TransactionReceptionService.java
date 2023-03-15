@@ -36,7 +36,7 @@ public class TransactionReceptionService {
             try {
                 verifyAndAddTransaction(transaction);
             } catch (IllegalArgumentException | InvalidKeyException e) {
-                return;
+                throw new RuntimeException(e);
             }
         }
     }
@@ -46,7 +46,7 @@ public class TransactionReceptionService {
             throw new InvalidKeyException("Transaction is not valid.");
 
         if (transaction.getAmount()
-                .compareTo(TransactionReceptionService.getBalance(Blockchain.getInstance(), transaction.getSendingWallet())) > 0)
+                .compareTo(transaction.getSendingWallet().getBalance()) > 0)
             throw new IllegalArgumentException("Sender does not have enough VC.");
 
         this.transactions.add(transaction);

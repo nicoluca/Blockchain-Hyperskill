@@ -9,7 +9,7 @@ public class Transaction implements Verifiable {
     private final CryptoWalletInterface sendingWallet;
     private final CryptoWalletInterface receivingWallet;
     private final BigDecimal amount;
-    private byte[] signature = null;
+    private byte[] signature;
 
     Transaction(CryptoWalletInterface sender, CryptoWalletInterface recipient, BigDecimal amount) {
         this.sendingWallet = sender;
@@ -36,7 +36,9 @@ public class Transaction implements Verifiable {
 
     @Override
     public String toString() {
-        return this.sendingWallet.getOwner().getName() + " sent " + this.amount + " VC to " + this.receivingWallet.getOwner().getName();
+        return this.sendingWallet.getOwner().getName() +
+                " sent " + this.amount + " VC to " +
+                this.receivingWallet.getOwner().getName();
     }
 
     public BigDecimal getAmount() {
